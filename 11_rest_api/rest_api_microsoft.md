@@ -6,9 +6,9 @@ A RESTful web API implementation is a web API that employs Representational Stat
 
 A RESTful web API should align with the following principles:
 
-Platform independence, which means that clients can call the web API regardless of the internal implementation. To achieve platform independence, the web API uses HTTP as a standard protocol, provides clear documentation, and supports a familiar data exchange format such as JSON or XML.
+- Platform independence, which means that clients can call the web API regardless of the internal implementation. To achieve platform independence, the web API uses HTTP as a standard protocol, provides clear documentation, and supports a familiar data exchange format such as JSON or XML.
 
-Loose coupling, which means that the client and the web service can evolve independently. The client doesn't need to know the internal implementation of the web service, and the web service doesn't need to know the internal implementation of the client. To achieve loose coupling in a RESTful web API, use only standard protocols and implement a mechanism that allows the client and the web service to agree on the format of the data to exchange.
+- Loose coupling, which means that the client and the web service can evolve independently. The client doesn't need to know the internal implementation of the web service, and the web service doesn't need to know the internal implementation of the client. To achieve loose coupling in a RESTful web API, use only standard protocols and implement a mechanism that allows the client and the web service to agree on the format of the data to exchange.
 
 This article describes best practices for designing RESTful web APIs. It also covers common design patterns and considerations for building web APIs that are easy to understand, flexible, and maintainable.
 
@@ -16,32 +16,37 @@ This article describes best practices for designing RESTful web APIs. It also co
 
 To implement a RESTful web API, you need to understand the following concepts.
 
-Uniform Resource Identifier (URI): REST APIs are designed around resources, which are any kind of object, data, or service that the client can access. Each resource is represented by a URI that uniquely identifies that resource. For example, the URI for a particular customer order might be:
+- Uniform Resource Identifier (URI): REST APIs are designed around resources, which are any kind of object, data, or service that the client can access. Each resource is represented by a URI that uniquely identifies that resource. For example, the URI for a particular customer order might be:
+`` HTTP
+https://api.contoso.com/orders/1 ``
+- Resource representation defines how a resource that's identified by its URI is encoded and transported over the HTTP protocol in a specific format, such as XML or JSON. Clients that want to retrieve a specific resource must use the resource's URI in the request to the API. The API returns a resource representation of the data that the URI indicates. For example, a client can make a GET request to the URI identifier https://api.contoso.com/orders/1 to receive the following JSON body:
+`` JSON
+{"orderId":1,"orderValue":99.9,"productId":1,"quantity":1} ``
+- Uniform interface is how RESTful APIs achieve loose coupling between client and service implementations. For REST APIs that are built on HTTP, the uniform interface includes using standard HTTP verbs to perform operations like GET, POST, PUT, PATCH, and DELETE on resources.
 
-HTTP
-https://api.contoso.com/orders/1
-Resource representation defines how a resource that's identified by its URI is encoded and transported over the HTTP protocol in a specific format, such as XML or JSON. Clients that want to retrieve a specific resource must use the resource's URI in the request to the API. The API returns a resource representation of the data that the URI indicates. For example, a client can make a GET request to the URI identifier https://api.contoso.com/orders/1 to receive the following JSON body:
+- Stateless request model: RESTful APIs use a stateless request model, which means that HTTP requests are independent and might occur in any order. For this reason, keeping transient state information between requests isn't feasible. The only place where information is stored is in the resources themselves, and each request should be an atomic operation. A stateless request model supports high scalability because it doesn't need to retain any affinity between clients and specific servers. However, the stateless model can also limit scalability because of challenges with web service back-end storage scalability. For more information about strategies to scale out a data store, see Data partitioning.
 
-JSON
-{"orderId":1,"orderValue":99.9,"productId":1,"quantity":1}
-Uniform interface is how RESTful APIs achieve loose coupling between client and service implementations. For REST APIs that are built on HTTP, the uniform interface includes using standard HTTP verbs to perform operations like GET, POST, PUT, PATCH, and DELETE on resources.
-
-Stateless request model: RESTful APIs use a stateless request model, which means that HTTP requests are independent and might occur in any order. For this reason, keeping transient state information between requests isn't feasible. The only place where information is stored is in the resources themselves, and each request should be an atomic operation. A stateless request model supports high scalability because it doesn't need to retain any affinity between clients and specific servers. However, the stateless model can also limit scalability because of challenges with web service back-end storage scalability. For more information about strategies to scale out a data store, see Data partitioning.
-
-Hypermedia links: REST APIs can be driven by hypermedia links that are contained in each resource representation. For example, the following code block shows a JSON representation of an order. It contains links to get or update the customer that's associated with the order.
-
-JSON
+- Hypermedia links: REST APIs can be driven by hypermedia links that are contained in each resource representation. For example, the following code block shows a JSON representation of an order. It contains links to get or update the customer that's associated with the order.
+```json
 {
-"orderID":3,
-"productID":2,
-"quantity":4,
-"orderValue":16.60,
-"links": [
-{"rel":"product","href":"https://api.contoso.com/customers/3", "action":"GET" },
-{"rel":"product","href":"https://api.contoso.com/customers/3", "action":"PUT" }
-]
+  "orderID": 3,
+  "productID": 2,
+  "quantity": 4,
+  "orderValue": 16.60,
+  "links": [
+    {
+      "rel": "product",
+      "href": "https://api.contoso.com/customers/3",
+      "action": "GET"
+    },
+    {
+      "rel": "product",
+      "href": "https://api.contoso.com/customers/3",
+      "action": "PUT"
+    }
+  ]
 }
-
+```
 ## Define RESTful web API resource URIs
 
 A RESTful web API is organized around resources. To organize your API design around resources, define resource URIs that map to the business entities. When possible, base resource URIs on nouns (the resource) and not verbs (the operations on the resource).
@@ -106,11 +111,11 @@ Important
 
 The following table uses an example e-commerce customer entity. A web API doesn't need to implement all of the request methods. The methods that it implements depend on the specific scenario.
 
-Resource POST GET PUT DELETE
-/customers Create a new customer Retrieve all customers Bulk update of customers Remove all customers
-/customers/1 Error Retrieve the details for customer 1 Update the details of customer 1 if it exists Remove customer 1
-/customers/1/orders Create a new order for customer 1 Retrieve all orders for customer 1 Bulk update of orders for customer 1 Remove all orders for customer 1
-
+| Resource                  | POST                                      | GET                                           | PUT                                      | DELETE                                      |
+|---------------------------|-------------------------------------------|-----------------------------------------------|------------------------------------------|---------------------------------------------|
+| `/customers`              | Create a new customer                     | Retrieve all customers                        | Bulk update of customers                 | Remove all customers                        |
+| `/customers/1`            | Error                                     | Retrieve the details for customer 1           | Update the details of customer 1 if it exists | Remove customer 1                           |
+| `/customers/1/orders`     | Create a new order for customer 1         | Retrieve all orders for customer 1            | Bulk update of orders for customer 1     | Remove all orders for customer 1            |
 ### GET requests
 
 A GET request retrieves a representation of the resource at the specified URI. The body of the response message contains the details of the requested resource.

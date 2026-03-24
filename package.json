@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/jayantkushwah24/ultimate-backend-nodejs-2026/issues"
   },
@@ -21,5 +21,9 @@
   "dependencies": {
     "axios": "^1.13.5",
     "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
